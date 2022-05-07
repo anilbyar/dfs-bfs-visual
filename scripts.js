@@ -198,6 +198,9 @@ startBFS.addEventListener('click', async function(){
     par[startNode] = startNode;
     
     
+    resetAll.disabled = true;
+    resetTraversal.disabled = true;
+
     var queue = []
     queue.push(startNode);
     
@@ -228,8 +231,12 @@ startDFS.addEventListener('click', async function(){
     par[startNode] = startNode;
     var found = false;
     let time = 0;
-    dfs(startNode, startNode);
 
+    // 
+    resetAll.disabled = true;
+    resetTraversal.disabled = true;
+     dfs(startNode, startNode);
+    // 
     function dfs(x, parent){
         par[x] = parent;
         
@@ -251,8 +258,10 @@ startDFS.addEventListener('click', async function(){
             }
         }  
     }
+    time+=5;
     doingDFS = false;
-    traceBack(par, endNode, time+5);
+    traceBack(par, endNode, time);
+    time+=2;
 })
 
 function traceBack(par, endNode, time){
@@ -262,6 +271,10 @@ function traceBack(par, endNode, time){
         node = par[node];
         if (node === par[node]) break;
     }
+    setTimeout(() => {
+        resetAll.disabled = false;
+        resetTraversal.disabled = false;
+    }, time*40);
 }
 
 resetAll.addEventListener('click', function(){
@@ -286,5 +299,5 @@ resetTraversal.addEventListener('click', ()=>{
 function updateNode(node, time, color){
     setTimeout(() => {
         grid[node].style.backgroundColor = color;
-    }, (time++)*40);
+    }, (time)*40);
 }
