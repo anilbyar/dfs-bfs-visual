@@ -107,7 +107,7 @@ button:hover{
     margin: 2px;
 }
 
-.reset {
+.reset, .addremblocks {
     width: 80%;
     display: flex;
     flex-direction: row;
@@ -116,3 +116,5 @@ button:hover{
 .reset button {
     width: 100%;
 }
+
+

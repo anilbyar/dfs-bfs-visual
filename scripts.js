@@ -5,13 +5,14 @@ var mainDiv = document.getElementById("main");
 var submit = document.getElementById("updrowcol");
 var start = document.getElementById("start");
 var end = document.getElementById("end");
-var blocks = document.getElementById("blocks");
+var selectblocks = document.getElementById("selectblocks");
+var deselectblocks = document.getElementById("deselectblocks");
 var startBFS = document.getElementById("startbfs");
 var startDFS = document.getElementById("startdfs");
 var resetAll = document.getElementById("resetall");
 var resetTraversal = document.getElementById("resettraversal");
 
-var startSelected = false, endSelected = false, blockSelected=false;
+var startSelected = false, endSelected = false, selectblockSelected=false, deselectblockSelected = false;
 var nr = 5, nc = 10;
 
 var grid;
@@ -83,7 +84,7 @@ function evlistener(){
     for (var i = 0;i<nr;i++){                
         for (var j = 0;j<nc;j++){
             let node = i*nc+j;
-            grid[node].blockSelected = 'on';
+            // grid[node].blockSelected = 'on';
             grid[node].addEventListener("click", function(){
                 if (startSelected) {
                     if (startNode!=-1) grid[startNode].style.backgroundColor = unvisitedColor;
@@ -99,29 +100,31 @@ function evlistener(){
                     if (isBlock[node]) isBlock[node] = false;
                     if (startNode==node) startNode = -1;
                 }
-                if (blockSelected) {
+                if (selectblockSelected) {
                     grid[node].style.backgroundColor = blockNodeColor;
                     isBlock[node] = true;
                     if (startNode===node) startNode = -1;
                     if (endNode===node) endNode = -1;
                 }
+                if (deselectblockSelected) {
+                    if (isBlock[node]){
+                        grid[node].style.backgroundColor = unvisitedColor;
+                        isBlock[node] = false;
+                    }
+                }
             });
             
-            // grid[node].addEventListener("mousedown", (e)=>{
-            // })
-            // grid[node].bind('click hover', function (){
-                
-                // })
-                // newgrid[i*nc+j].style.margin = "px";
             grid[node].addEventListener('mouseover', (e)=>{
-                if (blockSelected && e.ctrlKey) {
+                if (selectblockSelected && e.ctrlKey) {
                     if (!isBlock[node]){
                         grid[node].style.backgroundColor = blockNodeColor;
                         isBlock[node] = true;
                         if (startNode===node) startNode = -1;
                         if (endNode===node) endNode = -1;
                     }
-                    else {
+                }
+                else if (deselectblockSelected && e.ctrlKey) {
+                    if (isBlock[node]){
                         grid[node].style.backgroundColor = unvisitedColor;
                         isBlock[node] = false;
                     }
@@ -151,24 +154,44 @@ start.addEventListener('click', function (){
     else {
         start.style.backgroundColor = "rgb(158 183 170)";
         startSelected = true;
+        selectblockSelected = false;
+        deselectblockSelected = false;
         endSelected = false;
-        blockSelected = false;
         end.style.backgroundColor = "#d7f5e4";
-        blocks.style.backgroundColor = "#d7f5e4";
+        deselectblocks.style.backgroundColor = "#d7f5e4";
+        selectblocks.style.backgroundColor = "#d7f5e4";
     }
 })
-blocks.addEventListener('click', function (){
-    if (blockSelected){
-        blocks.style.backgroundColor = "#d7f5e4";
-        blockSelected = false;
+selectblocks.addEventListener('click', function (){
+    if (selectblockSelected){
+        selectblocks.style.backgroundColor = "#d7f5e4";
+        selectblockSelected = false;
     }
     else {
-        blocks.style.backgroundColor = "rgb(158 183 170)";
-        blockSelected = true;
+        selectblocks.style.backgroundColor = "rgb(158 183 170)";
+        selectblockSelected = true;
+        deselectblockSelected = false;
         endSelected = false;
         startSelected = false;
         start.style.backgroundColor = "#d7f5e4";
         end.style.backgroundColor = "#d7f5e4";
+        deselectblocks.style.backgroundColor = "#d7f5e4";
+    }
+})
+deselectblocks.addEventListener('click', function (){
+    if (deselectblockSelected){
+        deselectblocks.style.backgroundColor = "#d7f5e4";
+        deselectblockSelected = false;
+    }
+    else {
+        deselectblocks.style.backgroundColor = "rgb(158 183 170)";
+        deselectblockSelected = true;
+        selectblockSelected = false;
+        endSelected = false;
+        startSelected = false;
+        start.style.backgroundColor = "#d7f5e4";
+        end.style.backgroundColor = "#d7f5e4";
+        selectblocks.style.backgroundColor = "#d7f5e4";
     }
 })
 end.addEventListener('click', function (){
@@ -180,9 +203,11 @@ end.addEventListener('click', function (){
         end.style.backgroundColor = "rgb(158 183 170)";
         endSelected = true;
         startSelected = false;
-        blockSelected = false;
+        selectblockSelected = false;
+        deselectblockSelected = false;
         start.style.backgroundColor = "#d7f5e4";
-        blocks.style.backgroundColor = "#d7f5e4";
+        deselectblocks.style.backgroundColor = "#d7f5e4";
+        selectblocks.style.backgroundColor = "#d7f5e4";
     }
 })
 
@@ -215,11 +240,17 @@ startBFS.addEventListener('click', async function(){
                     traceBack(par, endNode, dist[endNode]+5);
                     return;
                 }
+                time = dist[graph[x][i]];
                 updateNode(graph[x][i], dist[graph[x][i]], visitedColor);
                 queue.push(graph[x][i]);
             }
         }
     }
+    doingBFS = false;
+    setTimeout(() => {
+        resetAll.disabled = false;
+        resetTraversal.disabled = false;
+    }, time*40);
 })
 
 startDFS.addEventListener('click', async function(){
@@ -260,8 +291,15 @@ startDFS.addEventListener('click', async function(){
     }
     time+=5;
     doingDFS = false;
-    traceBack(par, endNode, time);
-    time+=2;
+    if (found) {
+        traceBack(par, endNode, time);
+    }
+    else {
+        setTimeout(() => {
+            resetAll.disabled = false;
+            resetTraversal.disabled = false;
+        }, time*40);
+    }
 })
 
 function traceBack(par, endNode, time){
